@@ -27,8 +27,8 @@ services:
       POSTGRES_PASSWORD: root
       POSTGRES_DB: app
     volumes:
-      - database_data:/var/lib/postgresql/data:rw
-      - ./var/postgres:/var/www/var
+      - database_data:/var/lib/postgresql/data
+#      - ./var/postgres:/var/www/var
     networks:
       - app_network
     ports:
@@ -63,3 +63,4 @@ networks:
 
 volumes:
   database_data:
+  seaweed_data:
