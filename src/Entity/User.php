@@ -3,9 +3,12 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -13,9 +16,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(type: 'uuid', unique: true)]
+    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
+    #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
+    private Uuid|null $id = null;
 
     #[ORM\Column(length: 180)]
     private ?string $email = null;
@@ -32,7 +36,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
-    public function getId(): ?int
+    /**
+     * @var Collection<int, OAuth2UserConsent>
+     */
+    #[ORM\OneToMany(targetEntity: OAuth2UserConsent::class, mappedBy: 'owner')]
+    private Collection $oAuth2UserConsents;
+
+    public function __construct()
+    {
+        $this->oAuth2UserConsents = new ArrayCollection();
+    }
+
+    public function getId(): ?Uuid
     {
         return $this->id;
     }
@@ -105,5 +120,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
 
         return $data;
+    }
+
+    /**
+     * @return Collection<int, OAuth2UserConsent>
+     */
+    public function getOAuth2UserConsents(): Collection
+    {
+        return $this->oAuth2UserConsents;
+    }
+
+    public function addOAuth2UserConsent(OAuth2UserConsent $oAuth2UserConsent): static
+    {
+        if (!$this->oAuth2UserConsents->contains($oAuth2UserConsent)) {
+            $this->oAuth2UserConsents->add($oAuth2UserConsent);
+            $oAuth2UserConsent->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOAuth2UserConsent(OAuth2UserConsent $oAuth2UserConsent): static
+    {
+        if ($this->oAuth2UserConsents->removeElement($oAuth2UserConsent)) {
+            // set the owning side to null (unless already changed)
+            if ($oAuth2UserConsent->getOwner() === $this) {
+                $oAuth2UserConsent->setOwner(null);
+            }
+        }
+
+        return $this;
     }
 }
