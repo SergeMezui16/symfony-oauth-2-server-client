@@ -10,7 +10,7 @@ RUN chmod +x /usr/local/bin/install-php-extensions
 RUN install-php-extensions opcache iconv soap
 RUN install-php-extensions zip intl fileinfo
 RUN install-php-extensions pdo redis pdo_pgsql
-RUN install-php-extensions gd
+RUN install-php-extensions gd openssl
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer
 

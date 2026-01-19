@@ -14,13 +14,19 @@ class OAuth2ClientProfile
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(targetEntity: Client::class, cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(
+        name: 'client_identifier',
+        referencedColumnName: 'identifier',
+        nullable: false,
+        onDelete: 'CASCADE'
+    )]
     private ?Client $client = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
 
     public function getId(): ?int

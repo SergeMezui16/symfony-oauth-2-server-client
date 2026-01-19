@@ -16,7 +16,7 @@ league_oauth2_server:
     resource_server:
         public_key: '%env(resolve:OAUTH_PUBLIC_KEY)%'
     scopes:
-        available: ['email', 'profile', 'blog_read', 'blog_write']
+        available: ['email', 'profile', 'openid', 'offline_access']
         default: ['email', 'profile']
     persistence:
         doctrine:

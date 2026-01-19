@@ -19,6 +19,12 @@ class OAuth2UserConsent
     private ?User $owner = null;
 
     #[ORM\ManyToOne]
+    #[ORM\JoinColumn(
+        name: 'client_identifier',
+        referencedColumnName: 'identifier',
+        nullable: false,
+        onDelete: 'CASCADE'
+    )]
     private ?Client $client = null;
 
     #[ORM\Column]
