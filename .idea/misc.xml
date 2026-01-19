@@ -1,19 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="AIAssistantCustomInstructionsStorage">
-    <option name="instructions">
-      <map>
-        <entry key="AIAssistant.VCS.GenerateCommitMessage">
-          <value>
-            <AIAssistantStoredInstruction>
-              <option name="actionId" value="AIAssistant.VCS.GenerateCommitMessage" />
-              <option name="content" value="Avoid overly verbose descriptions or unnecessary details.&#10;Start with a short sentence in imperative form, no more than 50 characters long. This sentence should start with the type of the changes (fix, feat, ...) with the domain into braces like &quot;fix(domain): ...&quot; or &quot;fix(project:doamin): ...&quot; for repo with many projects.&#10;Then leave an empty line and continue with a more detailed explanation.&#10;Write only one sentence for the first part, and two or three sentences at most for the detailed explanation." />
-            </AIAssistantStoredInstruction>
-          </value>
-        </entry>
-      </map>
-    </option>
-  </component>
   <component name="MaterialThemeProjectNewConfig">
     <option name="metadata">
       <MTProjectMetadataState>
