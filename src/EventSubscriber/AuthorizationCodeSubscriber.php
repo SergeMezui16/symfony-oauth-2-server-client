@@ -1,57 +1,49 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\EventSubscriber;
 
-use League\Bundle\OAuth2ServerBundle\Event\AuthorizationRequestResolveEvent;
-use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Http\FirewallMapInterface;
-use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
-class AuthorizationCodeSubscriber implements EventSubscriberInterface
+use League\Bundle\OAuth2ServerBundle\Event\UserResolveEvent;
+use Symfony\Component\PasswordHasher\PasswordHasherInterface;
+use Symfony\Component\Security\Core\User\UserProviderInterface;
+
+final class AuthorizationCodeSubscriber
 {
-    use TargetPathTrait;
+    /**
+     * @var UserProviderInterface
+     */
+    private $userProvider;
 
-    private Security $security;
-    private UrlGeneratorInterface $urlGenerator;
-    private RequestStack $requestStack;
-    private $firewallName;
+    /**
+     * @var PasswordHasherInterface
+     */
+    private $userPasswordEncoder;
 
-    public function __construct(Security $security, UrlGeneratorInterface $urlGenerator, RequestStack $requestStack, FirewallMapInterface $firewallMap)
+    /**
+     * @param UserProviderInterface $userProvider
+     * @param PasswordHasherInterface $userPasswordEncoder
+     */
+    public function __construct(UserProviderInterface $userProvider, PasswordHasherInterface $userPasswordEncoder)
     {
-        $this->security = $security;
-        $this->urlGenerator = $urlGenerator;
-        $this->requestStack = $requestStack;
-        $this->firewallName = $firewallMap->getFirewallConfig($requestStack->getCurrentRequest())->getName();
+        $this->userProvider = $userProvider;
+        $this->userPasswordEncoder = $userPasswordEncoder;
     }
 
-    public function onLeagueOauth2ServerEventAuthorizationRequestResolve(AuthorizationRequestResolveEvent $event): void
+    /**
+     * @param UserResolveEvent $event
+     */
+    public function onUserResolve(UserResolveEvent $event): void
     {
-        $request = $this->requestStack->getCurrentRequest();
-        $user = $this->security->getUser();
-        $this->saveTargetPath($request->getSession(), $this->firewallName, $request->getUri());
-        $response = new RedirectResponse($this->urlGenerator->generate('app_login'), 307);
-        if ($user instanceof UserInterface) {
-            if ($request->getSession()->get('consent_granted') !== null) {
-                $event->resolveAuthorization($request->getSession()->get('consent_granted'));
-                $request->getSession()->remove('consent_granted');
-                return;
-            }
-            $response = new RedirectResponse($this->urlGenerator->generate('app_consent', $request->query->all()), 307);
+        $user = $this->userProvider->loadUserByUsername($event->getUsername());
+
+        if (null === $user) {
+            return;
         }
-        $event->setResponse($response);
-    }
 
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            'league.oauth2_server.event.authorization_request_resolve' => 'onLeagueOauth2ServerEventAuthorizationRequestResolve',
-        ];
+        if (!$this->userPasswordEncoder->verify($user, $event->getPassword())) {
+            return;
+        }
+
+        $event->setUser($user);
     }
 }

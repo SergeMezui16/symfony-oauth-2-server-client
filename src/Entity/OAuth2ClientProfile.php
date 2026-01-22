@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\OAuth2ClientProfileRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use League\Bundle\OAuth2ServerBundle\Model\Client;
 
@@ -14,19 +15,14 @@ class OAuth2ClientProfile
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(targetEntity: Client::class, cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(
-        name: 'client_identifier',
-        referencedColumnName: 'identifier',
-        nullable: false,
-        onDelete: 'CASCADE'
-    )]
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(referencedColumnName: 'identifier', nullable: false)]
     private ?Client $client = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
     public function getId(): ?int

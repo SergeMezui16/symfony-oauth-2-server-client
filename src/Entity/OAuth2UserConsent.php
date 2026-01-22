@@ -15,40 +15,87 @@ class OAuth2UserConsent
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'oAuth2UserConsents')]
-    private ?User $owner = null;
-
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(
-        name: 'client_identifier',
-        referencedColumnName: 'identifier',
-        nullable: false,
-        onDelete: 'CASCADE'
-    )]
-    private ?Client $client = null;
-
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    private ?\DateTimeImmutable $created = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $expiredAt = null;
+    private ?\DateTimeImmutable $expires = null;
 
     #[ORM\Column(type: Types::SIMPLE_ARRAY, nullable: true)]
-    private ?array $scopes = null;
+    private array $scopes = [];
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $ipAddress = null;
+
+    #[ORM\ManyToOne(cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(referencedColumnName: 'identifier', nullable: false)]
+    private ?Client $client = null;
+
+    #[ORM\ManyToOne(inversedBy: 'oAuth2UserConsents')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getOwner(): ?User
+    public function getUser(): ?User
     {
-        return $this->owner;
+        return $this->user;
     }
 
-    public function setOwner(?User $owner): static
+    public function setUser(User $user): self
     {
-        $this->owner = $owner;
+        $this->user = $user;
+
+        return $this;
+    }
+
+    public function getCreated(): ?\DateTimeImmutable
+    {
+        return $this->created;
+    }
+
+    public function setCreated(\DateTimeImmutable $created): self
+    {
+        $this->created = $created;
+
+        return $this;
+    }
+
+    public function getExpires(): ?\DateTimeImmutable
+    {
+        return $this->expires;
+    }
+
+    public function setExpires(?\DateTimeImmutable $expires): self
+    {
+        $this->expires = $expires;
+
+        return $this;
+    }
+
+    public function getScopes(): array
+    {
+        return $this->scopes;
+    }
+
+    public function setScopes(?array $scopes): self
+    {
+        $this->scopes = $scopes;
+
+        return $this;
+    }
+
+    public function getIpAddress(): ?string
+    {
+        return $this->ipAddress;
+    }
+
+    public function setIpAddress(?string $ipAddress): self
+    {
+        $this->ipAddress = $ipAddress;
 
         return $this;
     }
@@ -58,45 +105,9 @@ class OAuth2UserConsent
         return $this->client;
     }
 
-    public function setClient(?Client $client): static
+    public function setClient(Client $client): self
     {
         $this->client = $client;
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    public function getExpiredAt(): ?\DateTimeImmutable
-    {
-        return $this->expiredAt;
-    }
-
-    public function setExpiredAt(?\DateTimeImmutable $expiredAt): static
-    {
-        $this->expiredAt = $expiredAt;
-
-        return $this;
-    }
-
-    public function getScopes(): ?array
-    {
-        return $this->scopes;
-    }
-
-    public function setScopes(?array $scopes): static
-    {
-        $this->scopes = $scopes;
 
         return $this;
     }

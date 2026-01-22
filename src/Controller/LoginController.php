@@ -36,6 +36,16 @@ final class LoginController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws \Exception
+     */
+    #[Route('/logout', name: 'app_logout', methods: ['GET'])]
+    public function logout()
+    {
+        // controller can be blank: it will never be called!
+        throw new \Exception('Don\'t forget to activate logout in security.yaml');
+    }
+
     #[Route('/consent', name: 'app_consent', methods: ['GET', 'POST'])]
     public function consent(Request $request): Response
     {
